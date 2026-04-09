@@ -28,12 +28,24 @@ TREVL is built for humans and machines. Every feature is designed so that LLMs c
 - **JSON Schema** -- formal validation for editors, CI, and AI agents
 
 ```ruby
-# LLM workflow: discover → generate → validate → render
-fields = Trevl::DataSource.for("myapi").field_names("salary")  # => ["q10", "q50", "q90"]
-ref    = Trevl.schema_reference                                 # => compact TREVL reference
-yaml   = llm.generate(prompt, context: ref)                     # → LLM generates TREVL
-result = Trevl.validate(yaml)                                   # → structured errors
-chart  = Trevl.render(yaml)                                     # → Highcharts JSON
+# 1. Discover: what fields does this endpoint return?
+Trevl::DataSource.for("myapi").field_names("salary")
+# => ["q10", "q50", "q90"]
+
+# 2. Reference: get the compact TREVL spec for a system prompt
+Trevl.schema_reference
+# => "# TREVL — TREndence Visualization Language\n..."
+
+# 3. Examples: few-shot learning material
+Trevl.examples.first
+# => {name: "bar_chart", description: "Simple bar chart...", yaml: "..."}
+
+# 4. Validate: catch errors before rendering
+Trevl.validate(yaml).errors
+# => ["[my_chart] Missing required field(s): api, highchartsData (at )"]
+
+# 5. Render: YAML → Highcharts JSON
+Trevl.render(yaml)
 ```
 
 ## Features
