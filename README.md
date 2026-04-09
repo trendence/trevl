@@ -107,6 +107,30 @@ YAML
 # 3. Done -- results.first["highchartsData"] is ready for Highcharts
 ```
 
+## HTML Export
+
+Render TREVL to a standalone HTML file — self-contained, offline, no CDN:
+
+```ruby
+html = Trevl.render_to_html(yaml, width: 1000, height: 500)
+File.write("chart.html", html)
+```
+
+The output is a complete HTML document with Highcharts JS embedded inline. Open it in any browser, or take a screenshot for AI agents:
+
+```ruby
+# Grover gem (Puppeteer wrapper)
+Grover.new(html).to_png
+
+# Ferrum (Chrome DevTools Protocol)
+browser = Ferrum::Browser.new
+browser.content = html
+browser.screenshot(path: "chart.png")
+
+# Playwright MCP (for AI agents)
+# browser_navigate → browser_take_screenshot
+```
+
 ## iRuby Notebooks
 
 ```ruby

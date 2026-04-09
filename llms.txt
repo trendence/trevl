@@ -129,9 +129,13 @@ result = Trevl.validate(yaml)
 result.valid?    # => true/false
 result.errors    # => ["[component_id] Missing required field: api"]
 
-# Render
+# Render to Highcharts JSON
 results = Trevl.render(yaml)
 results.first["highchartsData"]  # => Highcharts JSON
+
+# Render to standalone HTML (self-contained, offline)
+html = Trevl.render_to_html(yaml, width: 800, height: 400)
+File.write("chart.html", html)
 
 # Discover data source fields
 Trevl::DataSource.for("demo").field_names("salary")

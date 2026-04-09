@@ -19,6 +19,7 @@ require_relative "trevl/auth/bearer_token"
 require_relative "trevl/processor"
 require_relative "trevl/renderer"
 require_relative "trevl/validator"
+require_relative "trevl/html_renderer"
 
 module Trevl
   class << self
@@ -52,6 +53,10 @@ module Trevl
       components.filter_map do |component|
         Renderer.new(component, params).render
       end
+    end
+
+    def render_to_html(yaml_string, params: {}, width: 800, height: 400)
+      HtmlRenderer.new(width: width, height: height).render(yaml_string, params: params)
     end
 
     GEM_ROOT = File.expand_path("..", __dir__)
