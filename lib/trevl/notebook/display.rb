@@ -3,22 +3,21 @@
 module Trevl
   class Notebook
     class Display
-      HIGHCHARTS_JS_PATH = File.expand_path("../../../vendor/highcharts/highcharts.js", __dir__)
+      VENDOR_DIR = File.expand_path("../../../vendor/highcharts", __dir__)
 
       def render_chart(highcharts_data, height: 400)
         container_id = "trevl_#{SecureRandom.hex(6)}"
-        highcharts_js = load_highcharts_js
 
-        html = <<~HTML
+        html = +""
+        html << highcharts_script_tag unless @highcharts_loaded
+        html << <<~HTML
           <div id="#{container_id}" style="width:100%;height:#{height}px;"></div>
           <script>
-            if (typeof Highcharts === 'undefined') {
-              #{highcharts_js}
-            }
             Highcharts.chart('#{container_id}', #{highcharts_data.to_json});
           </script>
         HTML
 
+        @highcharts_loaded = true
         display_html(html)
       end
 
@@ -40,13 +39,13 @@ module Trevl
 
       private
 
-      def load_highcharts_js
-        if File.exist?(HIGHCHARTS_JS_PATH)
-          File.read(HIGHCHARTS_JS_PATH)
-        else
-          Trevl.logger.warn("[Trevl::Notebook] Highcharts JS not found at #{HIGHCHARTS_JS_PATH}, falling back to CDN")
-          'document.write(\'<script src="https://code.highcharts.com/highcharts.js"><\\/script>\')'
+      def highcharts_script_tag
+        js_path = File.join(VENDOR_DIR, "highcharts.js")
+        unless File.exist?(js_path)
+          raise Trevl::Error, "Highcharts JS not found at #{js_path}. Run: curl -o #{js_path} https://unpkg.com/highcharts@11.4.0/highcharts.js"
         end
+
+        "<script>#{File.read(js_path)}</script>\n"
       end
 
       def display_html(html)
