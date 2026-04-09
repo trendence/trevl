@@ -18,6 +18,7 @@ require_relative "trevl/data_source/cube"
 require_relative "trevl/auth/bearer_token"
 require_relative "trevl/processor"
 require_relative "trevl/renderer"
+require_relative "trevl/validator"
 
 module Trevl
   class << self
@@ -39,6 +40,10 @@ module Trevl
 
     def parse(yaml_string)
       Processor.new(yaml_string)
+    end
+
+    def validate(yaml_string)
+      Validator.validate(yaml_string)
     end
 
     def render(yaml_string, params: {})

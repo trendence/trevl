@@ -1,0 +1,337 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trevl.trendence.com/schema/component.json",
+  "title": "TREVL Component",
+  "description": "Schema for a single TREVL visualization component",
+
+  "type": "object",
+  "required": ["id", "type"],
+
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique component identifier"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["chart", "score", "table", "text", "filter"],
+      "description": "Component type"
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable component name"
+    },
+    "api": {
+      "type": "string",
+      "description": "Registered data source name"
+    },
+    "api-parameters": {
+      "$ref": "#/$defs/apiParameters"
+    },
+    "template": {
+      "type": "string",
+      "description": "Name of a registered template to inherit from"
+    },
+    "computed": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/computedField" },
+      "description": "Per-row JavaScript transformations"
+    },
+    "postprocess": {
+      "type": "string",
+      "description": "JavaScript code to transform the full dataset. Must reassign $result to an Array."
+    },
+    "queries": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/query" },
+      "description": "Query definitions (for Cube/X-Middle data sources)"
+    },
+    "highchartsData": {
+      "$ref": "#/$defs/highchartsData"
+    },
+    "display": {
+      "$ref": "#/$defs/display"
+    },
+    "tableData": {
+      "$ref": "#/$defs/tableData"
+    },
+    "filters": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/filterDefinition" },
+      "description": "Filter definitions (for filter components)"
+    },
+    "text": {
+      "type": "string",
+      "description": "HTML content (for text components)"
+    },
+    "subheader": {
+      "type": "string"
+    },
+    "body": {
+      "type": "string"
+    }
+  },
+
+  "allOf": [
+    {
+      "if": { "properties": { "type": { "const": "chart" } } },
+      "then": {
+        "required": ["api", "highchartsData"],
+        "properties": {
+          "highchartsData": {
+            "required": ["series"]
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "type": { "const": "score" } } },
+      "then": {
+        "required": ["api", "display"]
+      }
+    },
+    {
+      "if": { "properties": { "type": { "const": "table" } } },
+      "then": {
+        "required": ["api", "tableData"]
+      }
+    },
+    {
+      "if": { "properties": { "type": { "const": "filter" } } },
+      "then": {
+        "required": ["api", "filters"]
+      }
+    }
+  ],
+
+  "$defs": {
+    "computedField": {
+      "type": "object",
+      "required": ["name", "code"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Field name added to each row"
+        },
+        "code": {
+          "type": "string",
+          "description": "JavaScript expression. Return value is assigned to the field."
+        },
+        "arguments": {
+          "type": "object",
+          "additionalProperties": {
+            "type": ["string", "number", "boolean"]
+          },
+          "description": "Named arguments. Use $endpoint.data.field references as values."
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "query": {
+      "type": "object",
+      "properties": {
+        "context": {
+          "type": "string",
+          "description": "Query context (e.g. target_group, compare_group)"
+        },
+        "dimensions": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "measures": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "filters": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/queryFilter" }
+        },
+        "computed": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/computedField" }
+        }
+      }
+    },
+
+    "queryFilter": {
+      "type": "object",
+      "required": ["member", "operator"],
+      "properties": {
+        "member": {
+          "type": "string",
+          "description": "Cube dimension/measure to filter on"
+        },
+        "operator": {
+          "type": "string",
+          "enum": ["equals", "notEquals", "gt", "gte", "lt", "lte", "afterDate", "beforeDate", "set", "notSet", "contains", "notContains"],
+          "description": "Filter operator"
+        },
+        "values": {
+          "type": "array",
+          "items": { "type": ["string", "number"] },
+          "description": "Static filter values"
+        },
+        "parameter": {
+          "type": "string",
+          "description": "Runtime parameter reference ($param_name)"
+        }
+      }
+    },
+
+    "apiParameters": {
+      "type": "object",
+      "description": "Parameters passed to the data source",
+      "additionalProperties": true
+    },
+
+    "highchartsData": {
+      "type": "object",
+      "description": "Highcharts configuration object",
+      "properties": {
+        "chart": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["bar", "column", "line", "area", "pie", "scatter", "spline", "areaspline", "heatmap", "bubble", "waterfall", "funnel", "gauge", "solidgauge", "bullet"],
+              "description": "Highcharts chart type"
+            },
+            "height": { "type": ["number", "string"] },
+            "backgroundColor": { "type": "string" }
+          },
+          "additionalProperties": true
+        },
+        "title": {
+          "type": "object",
+          "properties": {
+            "text": { "type": "string" }
+          },
+          "additionalProperties": true
+        },
+        "series": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/seriesDefinition" },
+          "description": "Data series definitions"
+        },
+        "xAxis": { "additionalProperties": true },
+        "yAxis": { "additionalProperties": true },
+        "colors": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "plotOptions": { "type": "object", "additionalProperties": true },
+        "legend": { "type": "object", "additionalProperties": true },
+        "tooltip": { "type": "object", "additionalProperties": true },
+        "credits": { "type": "object", "additionalProperties": true }
+      },
+      "additionalProperties": true
+    },
+
+    "seriesDefinition": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Series name. Can be a $reference."
+        },
+        "type": {
+          "type": "string",
+          "description": "Override chart type for this series"
+        },
+        "color": {
+          "type": "string"
+        },
+        "data": {
+          "type": "object",
+          "description": "Data point mapping. Keys (x, y, color, etc.) map to $references.",
+          "additionalProperties": {
+            "type": ["string", "number", "object"]
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+
+    "display": {
+      "type": "object",
+      "description": "Display configuration (primarily for score components)",
+      "properties": {
+        "value": {
+          "type": ["string", "number"],
+          "description": "Value to display. Can be a $reference."
+        },
+        "unit": {
+          "type": "string",
+          "description": "Unit suffix (e.g. '%', ' EUR')"
+        },
+        "header": {
+          "type": "object",
+          "properties": {
+            "title": { "type": "string" },
+            "icon": { "type": "string" }
+          },
+          "additionalProperties": true
+        },
+        "format": {
+          "type": "object",
+          "properties": {
+            "minimumFractionDigits": { "type": "integer" },
+            "maximumFractionDigits": { "type": "integer" }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+
+    "tableData": {
+      "type": "object",
+      "required": ["columns"],
+      "properties": {
+        "headers": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Column header labels"
+        },
+        "columns": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["identifier", "value"],
+            "properties": {
+              "identifier": { "type": "string" },
+              "value": { "type": "string", "description": "Value or $reference" }
+            },
+            "additionalProperties": true
+          }
+        },
+        "index": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+
+    "filterDefinition": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": ["select", "multiselect", "range", "date"],
+          "description": "Filter input type"
+        },
+        "label": { "type": "string" },
+        "options": {
+          "type": "object",
+          "description": "Option mapping with $references for value/label",
+          "additionalProperties": { "type": "string" }
+        },
+        "queries": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/query" }
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}
