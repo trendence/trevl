@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trevl.trendence.com/schema/document.json",
+  "title": "TREVL Document",
+  "description": "Schema for a TREVL YAML document — either a hash with 'components' key or a bare array of components",
+
+  "oneOf": [
+    {
+      "type": "object",
+      "required": ["components"],
+      "properties": {
+        "components": {
+          "type": "array",
+          "items": { "$ref": "component.json" },
+          "minItems": 1,
+          "description": "Array of TREVL components"
+        },
+        "parameters": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id"],
+            "properties": {
+              "id": { "type": "string" },
+              "type": { "type": "string", "enum": ["single", "multi"] },
+              "sources": { "type": "array" }
+            }
+          },
+          "description": "Runtime parameter definitions"
+        }
+      },
+      "additionalProperties": true
+    },
+    {
+      "type": "array",
+      "items": { "$ref": "component.json" },
+      "minItems": 1,
+      "description": "Bare array of components (shorthand)"
+    }
+  ]
+}

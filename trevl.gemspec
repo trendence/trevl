@@ -32,4 +32,5 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "execjs", "~> 2.9"
   spec.add_dependency "httparty", "~> 0.21"
+  spec.add_dependency "json_schemer", "~> 2.0"
 end
