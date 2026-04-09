@@ -187,7 +187,7 @@ result.valid?   # => false
 result.errors   # => ["[my_chart] Missing required field(s): api, highchartsData (at )"]
 ```
 
-Powered by [JSON Schema (draft 2020-12)](lib/trevl/schema/component.json) -- covers all 5 component types with conditional validation. The schema files work standalone in VS Code, CI pipelines, or any JSON Schema-compatible tool.
+Powered by [JSON Schema (draft 2020-12)](schema/component.json) -- covers all 5 component types with conditional validation. The schema files are available at `schema/` in the repo root and work standalone in VS Code, CI pipelines, or any JSON Schema-compatible tool.
 
 Ideal for AI agents: generate TREVL, validate, self-correct, render.
 
