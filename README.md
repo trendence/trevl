@@ -139,6 +139,27 @@ end
 Trevl::DataSource.register("db", MySource.new)
 ```
 
+## Validation
+
+Validate TREVL YAML before rendering — catch errors early, not at render time.
+
+```ruby
+result = Trevl.validate(<<~YAML)
+  components:
+  - id: my_chart
+    type: chart
+YAML
+
+result.valid?   # => false
+result.errors   # => ["[my_chart] Missing required field(s): api, highchartsData (at )"]
+```
+
+Powered by [JSON Schema (draft 2020-12)](lib/trevl/schema/component.json) -- covers all 5 component types with conditional validation. The schema files work standalone in VS Code, CI pipelines, or any JSON Schema-compatible tool.
+
+Ideal for AI agents: generate TREVL, validate, self-correct, render.
+
+Full docs: [trevl.trendence.com/validation](https://trevl.trendence.com/validation)
+
 ## YAML Reference
 
 ### Component Types
