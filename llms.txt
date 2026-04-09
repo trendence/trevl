@@ -150,7 +150,7 @@ Trevl.examples  # => [{name: "bar_chart", yaml: "...", description: "..."}, ...]
 
 ## Highcharts Chart Types
 
-bar, column, line, area, pie, scatter, spline, areaspline, heatmap, bubble, waterfall, funnel, gauge
+bar, column, line, area, pie, scatter, spline, areaspline, heatmap, bubble, waterfall, funnel, gauge, solidgauge, bullet
 
 ## Filter Operators
 
