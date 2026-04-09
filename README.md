@@ -23,7 +23,7 @@ TREVL is built for humans and machines. Every feature is designed so that LLMs c
 - **`Trevl.schema_reference`** -- compact reference (~1500 tokens) optimized for system prompts
 - **`Trevl.validate(yaml)`** -- structured error feedback for self-correction loops
 - **`Trevl.examples`** -- 10 annotated examples for few-shot learning
-- **`source.field_names(endpoint)`** -- discover available data fields, no guessing
+- **`Trevl::DataSource.for("name").field_names("endpoint")`** -- discover available data fields
 - **[`llms.txt`](llms.txt)** -- machine-readable reference in the repo root
 - **JSON Schema** -- formal validation for editors, CI, and AI agents
 
