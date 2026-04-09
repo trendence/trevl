@@ -5,8 +5,8 @@ require_relative "lib/trevl/version"
 Gem::Specification.new do |spec|
   spec.name = "trevl"
   spec.version = Trevl::VERSION
-  spec.authors = ["Trendence"]
-  spec.email = ["dev@trendence.com"]
+  spec.authors = ["Robin Stammer"]
+  spec.email = ["robin.stammer@trendence.com"]
 
   spec.summary = "TREVL visualization language engine"
   spec.description = "Parse, render, and display TREVL (Trendence Visualization Language) YAML " \
