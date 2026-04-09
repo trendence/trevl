@@ -1,0 +1,20 @@
+# Line chart for time series. Use when showing trends over time.
+components:
+- id: line_example
+  type: chart
+  api: demo
+  highchartsData:
+    chart:
+      type: line
+    title:
+      text: Monthly Active Users
+    xAxis:
+      type: category
+    yAxis:
+      title:
+        text: Users
+    series:
+    - name: MAU
+      data:
+        x: "$metrics.data.month"
+        y: "$metrics.data.active_users"

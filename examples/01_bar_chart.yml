@@ -1,0 +1,16 @@
+# Simple bar chart. Use when you want horizontal bars comparing categories.
+components:
+- id: bar_example
+  type: chart
+  api: demo
+  highchartsData:
+    chart:
+      type: bar
+    title:
+      text: Revenue by Region
+    colors: ["#003F85"]
+    series:
+    - name: Revenue
+      data:
+        x: "$revenue.data.region"
+        y: "$revenue.data.amount"

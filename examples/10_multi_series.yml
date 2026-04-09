@@ -1,0 +1,23 @@
+# Multiple series from the same data source. Use for comparison charts.
+# Each series maps different fields from the same rows.
+components:
+- id: multi_series_example
+  type: chart
+  api: demo
+  highchartsData:
+    chart:
+      type: column
+    title:
+      text: Revenue vs Cost by Quarter
+    colors: ["#003F85", "#E85D3A"]
+    legend:
+      enabled: true
+    series:
+    - name: Revenue
+      data:
+        x: "$financials.data.quarter"
+        y: "$financials.data.revenue"
+    - name: Cost
+      data:
+        x: "$financials.data.quarter"
+        y: "$financials.data.cost"

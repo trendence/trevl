@@ -1,0 +1,15 @@
+# Pie chart for proportions. Use when showing parts of a whole.
+components:
+- id: pie_example
+  type: chart
+  api: demo
+  highchartsData:
+    chart:
+      type: pie
+    title:
+      text: Market Share
+    series:
+    - name: Share
+      data:
+        name: "$market.data.company"
+        y: "$market.data.share"

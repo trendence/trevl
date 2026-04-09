@@ -1,0 +1,13 @@
+# Score component for a single KPI value. Use for dashboards with key numbers.
+components:
+- id: score_example
+  type: score
+  api: demo
+  display:
+    value: "$kpi.data.conversion_rate"
+    unit: "%"
+    header:
+      title: Conversion Rate
+    format:
+      minimumFractionDigits: 1
+      maximumFractionDigits: 1
