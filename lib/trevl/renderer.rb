@@ -387,7 +387,7 @@ module Trevl
             @warnings << "Postprocess for '#{component["id"]}' returned #{result.class} instead of Array"
             Trevl.logger.warn("[Trevl::Renderer] Postprocess returned non-Array for '#{component["id"]}'")
           end
-        rescue ExecJS::ProgramError => e
+        rescue ExecJS::Error => e
           raise RenderError, "Postprocess JavaScript error for '#{component["id"]}': #{e.message}"
         end
       end

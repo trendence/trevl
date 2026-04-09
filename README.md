@@ -1,122 +1,56 @@
 # TREVL
 
-**TREVL** (Trendence Visualization Language) is a Ruby gem for declarative data visualization. Define charts, scores, tables, and filters in YAML and render them as Highcharts JSON — in Rails apps, scripts, or iRuby notebooks.
+A Ruby gem for declarative data visualization. Write YAML, get Highcharts — in Rails apps, scripts, or iRuby notebooks.
 
-## Quick Start
+TREVL connects **data sources** (REST APIs, CubeJS, or static data) with **Highcharts** rendering through a simple, human-readable YAML configuration. No JavaScript required for chart definitions.
 
-### 1. Install
+**Language specification:** [trevl.trendence.com](https://trevl.trendence.com)
+
+## Features
+
+- **Declarative YAML** — define charts, scores, tables, and filters without writing JavaScript
+- **Pluggable data sources** — REST APIs, CubeJS, static/in-memory data, or your own
+- **Computed fields** — per-row JavaScript transformations (`code` expressions via ExecJS)
+- **Postprocess** — full-dataset transformations (sort, filter, aggregate) in JavaScript
+- **Template inheritance** — share chart styles across components with deep merge
+- **iRuby notebooks** — render interactive Highcharts directly in Jupyter notebooks
+- **Offline** — bundled Highcharts JS, no CDN dependency
+- **No Rails required** — standalone gem, zero framework dependencies
+
+## Installation
 
 Add to your Gemfile:
 
 ```ruby
-gem "trevl", path: "~/trendence/trevl"  # local development
+gem "trevl", github: "trendence/trevl"
 ```
 
-Or install directly:
+**Prerequisites:**
+- Ruby >= 3.1
+- A JavaScript runtime for computed fields (Node.js recommended: `brew install node`)
 
-```bash
-cd ~/trendence/trevl && bundle exec rake install
-```
-
-### 2. Configure a Data Source
+## Quick Start
 
 ```ruby
 require "trevl"
 
-# Option A: Static data (great for prototyping)
-Trevl::DataSource.register("mydata", Trevl::DataSource::Static.new(
-  data: {
-    "salary" => {
-      "data" => [
-        {"label" => "Junior",  "value" => 42000},
-        {"label" => "Mid",     "value" => 58000},
-        {"label" => "Senior",  "value" => 78000}
-      ],
-      "meta" => {"currency" => "EUR"}
-    }
-  }
-))
-
-# Option B: REST API
-Trevl::DataSource.register("myapi", Trevl::DataSource::Api.new(
-  base_url: "https://api.example.com/v1",
-  auth: Trevl::Auth::BearerToken.new(ENV["API_TOKEN"])
-))
-
-# Option C: CubeJS
-Trevl::DataSource.register("cube", Trevl::DataSource::Cube.new(
-  url: "https://cube.example.com/cubejs-api/v1",
-  token: ENV["CUBE_TOKEN"]
-))
-```
-
-### 3. Write TREVL YAML
-
-```yaml
-# salary_chart.yml
-components:
-- id: salary_chart
-  type: chart
-  api: mydata
-  highchartsData:
-    chart:
-      type: bar
-    title:
-      text: Salary by Seniority
-    series:
-    - name: Salary (EUR)
-      data:
-        x: "$salary.data.label"
-        y: "$salary.data.value"
-```
-
-### 4. Render
-
-```ruby
-yaml = File.read("salary_chart.yml")
-results = Trevl.render(yaml)
-# => [{"id" => "salary_chart", "type" => "chart", "highchartsData" => { ... }}]
-```
-
-## iRuby Notebook Usage
-
-### Prerequisites
-
-```bash
-# Install iRuby (if not already installed)
-gem install iruby
-iruby register --force
-
-# Install a JavaScript runtime for computed fields
-brew install node  # macOS
-```
-
-### In a Notebook Cell
-
-```ruby
-require "trevl"
-require "trevl/notebook"
-
-# Register static data
+# 1. Register a data source
 Trevl::DataSource.register("demo", Trevl::DataSource::Static.new(
   data: {
     "salary" => {
       "data" => [
-        {"label" => "Junior",  "value" => 42000},
-        {"label" => "Mid",     "value" => 58000},
-        {"label" => "Senior",  "value" => 78000},
-        {"label" => "Lead",    "value" => 92000}
+        {"level" => "Junior",  "value" => 42000},
+        {"level" => "Senior",  "value" => 78000},
+        {"level" => "Lead",    "value" => 92000}
       ]
     }
   }
 ))
 
-nb = Trevl::Notebook.new
-
-# Render a bar chart
-nb.chart <<~YAML
+# 2. Render TREVL YAML
+results = Trevl.render(<<~YAML)
   components:
-  - id: salary
+  - id: salary_chart
     type: chart
     api: demo
     highchartsData:
@@ -124,175 +58,241 @@ nb.chart <<~YAML
         type: bar
       title:
         text: Salary by Level
-      colors: ["#003F85"]
       series:
       - name: Salary (EUR)
         data:
-          x: "$salary.data.label"
+          x: "$salary.data.level"
+          y: "$salary.data.value"
+YAML
+
+# 3. Use the Highcharts JSON
+results.first["highchartsData"]
+# => {"chart" => {"type" => "bar"}, "title" => {...}, "series" => [...], "xAxis" => [...]}
+```
+
+## iRuby Notebooks
+
+Render interactive charts directly in Jupyter:
+
+```ruby
+require "trevl"
+require "trevl/notebook"
+
+nb = Trevl::Notebook.new
+
+nb.chart(<<~YAML, data: {"salary" => {"data" => [...]}})
+  components:
+  - id: chart
+    type: chart
+    api: static
+    highchartsData:
+      chart:
+        type: column
+      series:
+      - data:
+          x: "$salary.data.level"
           y: "$salary.data.value"
 YAML
 ```
 
-### Inline Data Override
+Highcharts is bundled in the gem — charts render offline, no CDN needed.
 
-Skip data source registration and pass data directly:
+See [`notebooks/demo.ipynb`](notebooks/demo.ipynb) for 5 working examples including computed fields, postprocess, scores, and templates.
+
+## Data Sources
+
+### Static (in-memory)
 
 ```ruby
-nb.chart(yaml_string, data: {
-  "salary" => {
-    "data" => [
-      {"label" => "Berlin", "value" => 55000},
-      {"label" => "Munich", "value" => 62000}
-    ]
+Trevl::DataSource.register("mydata", Trevl::DataSource::Static.new(
+  data: {
+    "endpoint_name" => {
+      "data" => [{"x" => "A", "y" => 10}, ...],
+      "meta" => {"total" => 100}
+    }
   }
-})
+))
 ```
 
-### Fetch Raw Data
+### REST API
 
 ```ruby
-nb.fetch("myapi", "salary", profession: {id: "43104"})
-# => {"data" => [...], "meta" => {...}}
+Trevl::DataSource.register("myapi", Trevl::DataSource::Api.new(
+  base_url: "https://api.example.com/v1",
+  auth: Trevl::Auth::BearerToken.new(ENV["API_TOKEN"])
+))
+```
+
+### CubeJS
+
+```ruby
+Trevl::DataSource.register("cube", Trevl::DataSource::Cube.new(
+  url: "https://cube.example.com/cubejs-api/v1",
+  token: ENV["CUBE_TOKEN"]
+))
+```
+
+### Custom
+
+Implement `#fetch(endpoint, params, resource:)` returning `{"data" => [...], "meta" => {...}}`:
+
+```ruby
+class MyDatabaseSource < Trevl::DataSource::Base
+  def fetch(endpoint, params = {}, resource: nil)
+    rows = MyDB.query(endpoint, params)
+    {"data" => rows, "meta" => {}}
+  end
+end
+
+Trevl::DataSource.register("db", MyDatabaseSource.new)
 ```
 
 ## TREVL YAML Reference
 
 ### Component Types
 
-| Type | Purpose |
-|------|---------|
+| Type | Description |
+|------|-------------|
 | `chart` | Highcharts visualization (bar, column, line, pie, etc.) |
-| `score` | Single KPI value with optional unit |
-| `table` | Data table with columns |
+| `score` | Single KPI value with optional unit and header |
+| `table` | Data table with column definitions |
 | `text` | Static text/HTML content |
-| `filter` | Filter options for parameters |
+| `filter` | Filter options bound to data |
 
 ### Variable References
 
-Use `$` to reference data fields in your YAML:
+Reference data fields with `$` syntax:
 
 ```yaml
-# From data rows
-"$endpoint.data.fieldName"     # e.g. $salary.data.q50
-
-# From metadata
-"$endpoint.meta.fieldName"     # e.g. $salary.meta.total_results
-
-# With resource qualifier
-"$resource.endpoint.data.field" # e.g. $surveys.distribution.data.share
-
-# Shorthand (legacy)
-"$endpoint.fieldName"          # e.g. $salary.q50
+"$endpoint.data.fieldName"           # Row field
+"$endpoint.meta.fieldName"           # Metadata field
+"$resource.endpoint.data.fieldName"  # With resource qualifier
+"$computedFieldName"                 # Computed field (shorthand)
 ```
 
 ### Computed Fields
 
-Transform data per-row using JavaScript expressions:
+Per-row JavaScript expressions. Arguments bind `$` references to variables:
 
 ```yaml
 computed:
-- name: formatted_salary
-  arguments:
-    val: "$salary.data.value"
-  code: "Math.round(val / 1000) + 'k'"
 - name: color
   arguments:
     val: "$salary.data.value"
-  code: 'val > 60000 ? "#003F85" : "#999"'
+  code: 'val > 60000 ? "#003F85" : "#B0C4DE"'
+- name: label
+  code: '"Salary"'
 ```
 
 ### Postprocess
 
-Transform the entire dataset after computed fields:
+Transform the full dataset after computed fields:
 
 ```yaml
-postprocess: |-
+postprocess: |
   $result = $result
-    .sort((a, b) => b.value - a.value)
-    .slice(0, 5);
+    .sort(function(a, b) { return b.value - a.value; })
+    .slice(0, 10);
 ```
 
 ### Templates
 
-Share Highcharts configurations across components:
+Register reusable chart configurations:
 
 ```ruby
 Trevl.template_store.register("blue_bar", {
   "highchartsData" => {
     "chart" => {"type" => "bar"},
-    "colors" => ["#003F85", "#4A90D9"],
+    "colors" => ["#003F85"],
     "plotOptions" => {"bar" => {"borderRadius" => 4}}
   }
 })
 ```
 
 ```yaml
-components:
 - id: my_chart
   type: chart
-  template: blue_bar   # inherits all settings, can override any
-  api: mydata
+  template: blue_bar        # Inherits all settings
   highchartsData:
     title:
-      text: My Chart    # overrides only the title
+      text: My Chart         # Override only what you need
     series:
     - data:
-        x: "$salary.data.label"
-        y: "$salary.data.value"
+        y: "$endpoint.data.value"
 ```
 
-## Custom Data Sources
+Templates use deep merge: component values override template values at the same path, template values fill in the rest.
 
-Implement your own by subclassing `Trevl::DataSource::Base`:
+### API Parameters
+
+Pass parameters to data sources:
+
+```yaml
+- id: chart
+  type: chart
+  api: myapi
+  api-parameters:
+    profession:
+      id: "43104"
+      taxonomy: kldb
+    location:
+      country: DE
+    time:
+      start_month_offset: -12
+  highchartsData:
+    series:
+    - data:
+        y: "$salary.data.q50"
+```
+
+## Authentication
+
+### Bearer Token
 
 ```ruby
-class MyCustomSource < Trevl::DataSource::Base
-  def fetch(endpoint, params = {}, resource: nil)
-    rows = MyDatabase.query(endpoint, params)
-    {"data" => rows, "meta" => {}}
-  end
-end
-
-Trevl::DataSource.register("mydb", MyCustomSource.new)
+auth = Trevl::Auth::BearerToken.new("my-secret-token")
 ```
 
-## Custom Authentication
+### Custom
 
 Any object responding to `#apply(headers, url:)`:
 
 ```ruby
-class OAuth2Auth
-  def initialize(client_id:, client_secret:)
-    @client_id = client_id
-    @client_secret = client_secret
-  end
-
+class MyOAuth < Struct.new(:client_id, :secret)
   def apply(headers, url: nil)
-    token = fetch_oauth_token
-    headers["Authorization"] = "Bearer #{token}"
-  end
-
-  private
-
-  def fetch_oauth_token
-    # your OAuth2 flow here
+    headers["Authorization"] = "Bearer #{fetch_token}"
   end
 end
+```
 
-Trevl::DataSource.register("api", Trevl::DataSource::Api.new(
-  base_url: "https://api.example.com",
-  auth: OAuth2Auth.new(client_id: "...", client_secret: "...")
-))
+## Configuration
+
+```ruby
+Trevl.configure do |c|
+  c.logger = Logger.new($stdout, level: :info)
+  c.template_store = my_custom_store  # any object with #find(name)
+end
 ```
 
 ## Development
 
 ```bash
-bin/setup          # install dependencies
-bundle exec rspec  # run tests
-bundle exec standardrb  # lint
-bin/console        # interactive console
+bin/setup              # Install dependencies
+bundle exec rspec      # Run tests (72 specs)
+bundle exec standardrb # Lint
+bin/console            # Interactive console
 ```
+
+## Language Specification
+
+The full TREVL language specification is available at [trevl.trendence.com](https://trevl.trendence.com), covering:
+
+- Component types and their schemas
+- Query definitions and filter operators
+- Computed field expression syntax
+- Postprocess transformation patterns
+- Template inheritance rules
+- Data source integration
 
 ## License
 
