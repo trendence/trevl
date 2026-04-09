@@ -1,6 +1,8 @@
 # TREVL
 
-A Ruby gem for declarative data visualization. Write YAML, get Highcharts — in Rails apps, scripts, or iRuby notebooks.
+Write YAML, get Highcharts — in Rails apps, scripts, or iRuby notebooks.
+
+[Trendence](https://www.trendence.com) is a Berlin-based HR data and analytics company. We believe data visualization should be modern, AI-ready, and accessible. That's why we've been building TREVL — the **TR**Endence **V**isualization **L**anguage — a custom DSL designed to make chart creation as simple as writing a few lines of YAML. A language humans easily can use and robots love.
 
 TREVL connects **data sources** (REST APIs, CubeJS, or static data) with **Highcharts** rendering through a simple, human-readable YAML configuration. No JavaScript required for chart definitions.
 
