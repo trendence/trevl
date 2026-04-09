@@ -15,6 +15,7 @@ module Trevl
       include HTTParty
 
       EMPTY_RESULT = {"data" => [], "meta" => {}}.freeze
+      QUERY_KEYS = %w[dimensions measures filters timeDimensions order limit].freeze
 
       def initialize(url:, token: nil, **)
         super()
@@ -24,10 +25,7 @@ module Trevl
 
       def fetch(endpoint, params = {}, resource: nil)
         query = build_query(params)
-        headers = {
-          "Content-Type" => "application/json",
-          "Accept" => "application/json"
-        }
+        headers = {"Content-Type" => "application/json", "Accept" => "application/json"}
         headers["Authorization"] = @token if @token
 
         Trevl.logger.info("[Trevl::DataSource::Cube] Querying #{@url}/load")
@@ -55,17 +53,12 @@ module Trevl
       private
 
       def build_query(params)
-        query = {}
-        query["dimensions"] = params["dimensions"] || params[:dimensions] if params.key?("dimensions") || params.key?(:dimensions)
-        query["measures"] = params["measures"] || params[:measures] if params.key?("measures") || params.key?(:measures)
-        query["filters"] = params["filters"] || params[:filters] if params.key?("filters") || params.key?(:filters)
-        query["timeDimensions"] = params["timeDimensions"] || params[:timeDimensions] if params.key?("timeDimensions") || params.key?(:timeDimensions)
-        query["order"] = params["order"] || params[:order] if params.key?("order") || params.key?(:order)
-        query["limit"] = params["limit"] || params[:limit] if params.key?("limit") || params.key?(:limit)
-        query
+        QUERY_KEYS.each_with_object({}) do |key, query|
+          val = params[key] || params[key.to_sym]
+          query[key] = val if val
+        end
       end
 
-      # CubeJS returns keys like "ModelName.fieldName" — flatten to just "fieldName"
       def flatten_keys(row)
         row.each_with_object({}) do |(key, value), flat|
           flat_key = key.to_s.include?(".") ? key.to_s.split(".").last : key.to_s

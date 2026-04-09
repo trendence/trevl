@@ -22,7 +22,11 @@ require_relative "trevl/validator"
 require_relative "trevl/html_renderer"
 
 module Trevl
+  GEM_ROOT = File.expand_path("..", __dir__)
+
   class << self
+    # --- Configuration ---
+
     def configure
       yield(configuration)
     end
@@ -31,13 +35,10 @@ module Trevl
       @configuration ||= Configuration.new
     end
 
-    def logger
-      configuration.logger
-    end
+    def logger = configuration.logger
+    def template_store = configuration.template_store
 
-    def template_store
-      configuration.template_store
-    end
+    # --- Core API ---
 
     def parse(yaml_string)
       Processor.new(yaml_string)
@@ -48,18 +49,15 @@ module Trevl
     end
 
     def render(yaml_string, params: {})
-      processor = parse(yaml_string)
-      components = processor.components || []
-      components.filter_map do |component|
-        Renderer.new(component, params).render
-      end
+      components = parse(yaml_string).components || []
+      components.filter_map { |c| Renderer.new(c, params).render }
     end
 
     def render_to_html(yaml_string, params: {}, width: 800, height: 400)
       HtmlRenderer.new(width: width, height: height).render(yaml_string, params: params)
     end
 
-    GEM_ROOT = File.expand_path("..", __dir__)
+    # --- AI tooling ---
 
     def schema_reference
       @schema_reference ||= File.read(File.join(GEM_ROOT, "llms.txt"))
@@ -68,6 +66,8 @@ module Trevl
     def examples
       @examples ||= load_examples
     end
+
+    # --- Lifecycle ---
 
     def reset!
       @configuration = Configuration.new
@@ -86,7 +86,6 @@ module Trevl
         content = File.read(path)
         comment_lines = content.lines.take_while { |l| l.start_with?("#") }
         description = comment_lines.map { |l| l.sub(/^#\s?/, "").chomp }.join(" ").strip
-
         {name: name, description: description, yaml: content.sub(/\A(#[^\n]*\n)+/, "")}
       end
     end

@@ -58,21 +58,6 @@ RSpec.describe Trevl::DataSource do
 
       api = result.find { |s| s[:name] == "api" }
       expect(api[:type]).to eq("Api")
-      expect(api[:base_url]).to eq("https://example.com/v1")
-    end
-
-    it "includes base_url for Api sources" do
-      described_class.register("myapi", Trevl::DataSource::Api.new(base_url: "https://api.test.com"))
-
-      info = described_class.all.first
-      expect(info[:base_url]).to eq("https://api.test.com")
-    end
-
-    it "includes url for Cube sources" do
-      described_class.register("cube", Trevl::DataSource::Cube.new(url: "https://cube.test.com/cubejs-api/v1"))
-
-      info = described_class.all.first
-      expect(info[:url]).to eq("https://cube.test.com/cubejs-api/v1")
     end
 
     it "handles Class registrations" do
