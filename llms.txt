@@ -1,0 +1,158 @@
+# TREVL — TREndence Visualization Language
+
+> Write YAML, get Highcharts. AI-first Ruby gem for declarative data visualization.
+
+## What is TREVL?
+
+TREVL is a YAML-based DSL that turns declarative component definitions into Highcharts JSON.
+You describe what data to fetch, how to transform it, and how to display it.
+The engine does the rest.
+
+## Install
+
+```ruby
+gem "trevl", github: "trendence/trevl"
+```
+
+## Component Types
+
+| Type   | Required fields                    |
+|--------|------------------------------------|
+| chart  | id, type, api, highchartsData      |
+| score  | id, type, api, display             |
+| table  | id, type, api, tableData           |
+| text   | id, type                           |
+| filter | id, type, api, filters             |
+
+## Variable Reference Syntax
+
+```
+$endpoint.data.fieldName             → row field value
+$endpoint.meta.fieldName             → metadata value
+$resource.endpoint.data.fieldName    → with resource qualifier
+$computedFieldName                   → computed field shorthand
+```
+
+## Minimal Chart Example
+
+```yaml
+components:
+- id: my_chart
+  type: chart
+  api: my_data_source
+  highchartsData:
+    chart:
+      type: bar
+    title:
+      text: My Chart
+    series:
+    - name: Values
+      data:
+        x: "$endpoint.data.label"
+        y: "$endpoint.data.value"
+```
+
+## Computed Fields (per-row JavaScript)
+
+```yaml
+computed:
+- name: color
+  arguments:
+    val: "$endpoint.data.value"
+  code: 'val > 50 ? "#003F85" : "#ccc"'
+```
+
+## Postprocess (full-dataset JavaScript)
+
+```yaml
+postprocess: |
+  $result = $result
+    .sort(function(a, b) { return b.value - a.value; })
+    .slice(0, 10);
+```
+
+## Templates (inherit + override)
+
+```yaml
+- id: my_chart
+  type: chart
+  api: myapi
+  template: blue_bar
+  highchartsData:
+    title:
+      text: Override Title Only
+    series:
+    - data:
+        y: "$endpoint.data.value"
+```
+
+## Score Example
+
+```yaml
+- id: kpi
+  type: score
+  api: myapi
+  display:
+    value: "$endpoint.data.avg_salary"
+    unit: " EUR"
+    header:
+      title: Average Salary
+```
+
+## Table Example
+
+```yaml
+- id: data_table
+  type: table
+  api: myapi
+  tableData:
+    headers: ["Name", "Value"]
+    columns:
+    - identifier: name
+      value: "$endpoint.data.name"
+    - identifier: val
+      value: "$endpoint.data.value"
+```
+
+## Ruby API
+
+```ruby
+require "trevl"
+
+# Register data source
+Trevl::DataSource.register("demo", Trevl::DataSource::Static.new(
+  data: {"salary" => {"data" => [...], "meta" => {}}}
+))
+
+# Validate
+result = Trevl.validate(yaml)
+result.valid?    # => true/false
+result.errors    # => ["[component_id] Missing required field: api"]
+
+# Render
+results = Trevl.render(yaml)
+results.first["highchartsData"]  # => Highcharts JSON
+
+# Discover data source fields
+Trevl::DataSource.for("demo").field_names("salary")
+# => ["label", "value"]
+
+# Get this reference
+Trevl.schema_reference  # => this text
+
+# List examples
+Trevl.examples  # => [{name: "bar_chart", yaml: "...", description: "..."}, ...]
+```
+
+## Highcharts Chart Types
+
+bar, column, line, area, pie, scatter, spline, areaspline, heatmap, bubble, waterfall, funnel, gauge
+
+## Filter Operators
+
+equals, notEquals, gt, gte, lt, lte, afterDate, beforeDate, set, notSet, contains, notContains
+
+## Docs
+
+https://trevl.trendence.com
+https://github.com/trendence/trevl

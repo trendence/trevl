@@ -1,0 +1,19 @@
+# Vertical column chart. Use for comparing values across categories side by side.
+components:
+- id: column_example
+  type: chart
+  api: demo
+  highchartsData:
+    chart:
+      type: column
+    title:
+      text: Sales by Quarter
+    colors: ["#003F85", "#E87722"]
+    plotOptions:
+      column:
+        borderRadius: 4
+    series:
+    - name: Sales
+      data:
+        x: "$sales.data.quarter"
+        y: "$sales.data.total"

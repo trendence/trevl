@@ -54,8 +54,36 @@ module Trevl
       end
     end
 
+    GEM_ROOT = File.expand_path("..", __dir__)
+
+    def schema_reference
+      @schema_reference ||= File.read(File.join(GEM_ROOT, "llms.txt"))
+    end
+
+    def examples
+      @examples ||= load_examples
+    end
+
     def reset!
       @configuration = Configuration.new
+      @schema_reference = nil
+      @examples = nil
+    end
+
+    private
+
+    def load_examples
+      dir = File.join(GEM_ROOT, "examples")
+      return [] unless File.directory?(dir)
+
+      Dir.glob(File.join(dir, "*.yml")).sort.map do |path|
+        name = File.basename(path, ".yml")
+        content = File.read(path)
+        comment_lines = content.lines.take_while { |l| l.start_with?("#") }
+        description = comment_lines.map { |l| l.sub(/^#\s?/, "").chomp }.join(" ").strip
+
+        {name: name, description: description, yaml: content.sub(/\A(#[^\n]*\n)+/, "")}
+      end
     end
   end
 end

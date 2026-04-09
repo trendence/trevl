@@ -1,0 +1,14 @@
+# Data table with columns. Use when you need tabular output instead of charts.
+components:
+- id: table_example
+  type: table
+  api: demo
+  tableData:
+    headers: ["Employee", "Department", "Salary"]
+    columns:
+    - identifier: employee
+      value: "$staff.data.name"
+    - identifier: department
+      value: "$staff.data.department"
+    - identifier: salary
+      value: "$staff.data.salary"

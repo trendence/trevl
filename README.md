@@ -16,6 +16,26 @@
 
 [Trendence](https://www.trendence.com) is a Berlin-based HR data and analytics company. We believe data visualization should be modern, AI-ready, and accessible. That's why we've been building TREVL -- the **TR**Endence **V**isualization **L**anguage -- a custom DSL designed to make chart creation as simple as writing a few lines of YAML. A language humans easily can use and robots love.
 
+## AI-First Design
+
+TREVL is built for humans and machines. Every feature is designed so that LLMs can generate, validate, and iterate on visualizations autonomously:
+
+- **`Trevl.schema_reference`** -- compact reference (~1500 tokens) optimized for system prompts
+- **`Trevl.validate(yaml)`** -- structured error feedback for self-correction loops
+- **`Trevl.examples`** -- 10 annotated examples for few-shot learning
+- **`source.field_names(endpoint)`** -- discover available data fields, no guessing
+- **[`llms.txt`](llms.txt)** -- machine-readable reference in the repo root
+- **JSON Schema** -- formal validation for editors, CI, and AI agents
+
+```ruby
+# LLM workflow: discover → generate → validate → render
+fields = Trevl::DataSource.for("myapi").field_names("salary")  # => ["q10", "q50", "q90"]
+ref    = Trevl.schema_reference                                 # => compact TREVL reference
+yaml   = llm.generate(prompt, context: ref)                     # → LLM generates TREVL
+result = Trevl.validate(yaml)                                   # → structured errors
+chart  = Trevl.render(yaml)                                     # → Highcharts JSON
+```
+
 ## Features
 
 - **Declarative YAML** -- define charts, scores, tables, and filters without writing JavaScript
@@ -23,6 +43,7 @@
 - **Computed fields** -- per-row JavaScript transformations via ExecJS
 - **Postprocess** -- full-dataset transforms (sort, filter, aggregate) in JavaScript
 - **Template inheritance** -- share chart styles with deep merge
+- **JSON Schema validation** -- catch errors before rendering
 - **iRuby notebooks** -- render interactive Highcharts directly in Jupyter
 - **Fully offline** -- bundled Highcharts JS, no CDN needed
 - **Standalone** -- no Rails, no framework dependencies
@@ -252,7 +273,7 @@ end
 
 ```bash
 bin/setup              # install dependencies
-bundle exec rspec      # 72 specs
+bundle exec rspec      # 103 specs
 bundle exec standardrb # lint
 bin/console            # interactive console
 ```

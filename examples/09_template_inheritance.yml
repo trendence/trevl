@@ -1,0 +1,25 @@
+# Template inheritance. Register a template first, then reference it.
+# Component values override template values at the same path (deep merge).
+#
+# Ruby setup:
+#   Trevl.template_store.register("branded_bar", {
+#     "highchartsData" => {
+#       "chart" => {"type" => "bar"},
+#       "colors" => ["#003F85", "#E87722"],
+#       "plotOptions" => {"bar" => {"borderRadius" => 6}},
+#       "credits" => {"enabled" => false}
+#     }
+#   })
+components:
+- id: template_example
+  type: chart
+  api: demo
+  template: branded_bar
+  highchartsData:
+    title:
+      text: Uses branded_bar template
+    series:
+    - name: Data
+      data:
+        x: "$endpoint.data.label"
+        y: "$endpoint.data.value"
