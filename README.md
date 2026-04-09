@@ -1,11 +1,13 @@
 <p align="center">
   <img src="assets/trevl-logo.svg" alt="TREVL" width="220" />
+  <br /><br />
+  <img src="assets/trendence-logo.svg" alt="Trendence" width="140" />
 </p>
 
 <h3 align="center">Write YAML, get Highcharts.</h3>
 
 <p align="center">
-  <a href="https://trevl.trendence.com">Language Spec</a> &middot;
+  <a href="https://trevl.trendence.com">DSL Documentation</a> &middot;
   <a href="notebooks/demo.ipynb">Demo Notebook</a> &middot;
   <a href="https://github.com/trendence/trevl">GitHub</a>
 </p>
