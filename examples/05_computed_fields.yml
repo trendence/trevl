@@ -1,30 +1,26 @@
 # Computed fields with conditional coloring. Use when you need per-row logic.
 # Arguments bind $references to JS variables. Code is a JS expression.
+# Computed field results are accessible as row fields via $endpoint.data.fieldName.
 components:
-- id: computed_example
+- id: insult_mastery
   type: chart
   api: demo
   computed:
   - name: color
     arguments:
-      val: "$scores.data.score"
-    code: 'val > 80 ? "#2E7D32" : val > 50 ? "#F57F17" : "#C62828"'
-  - name: label
-    arguments:
-      name: "$scores.data.name"
-      val: "$scores.data.score"
-    code: 'name + " (" + val + "%)"'
+      val: "$pirates.data.skill"
+    code: 'val > 80 ? "#2E7D32" : val > 50 ? "#E65100" : "#C62828"'
   highchartsData:
     chart:
       type: bar
     title:
-      text: Performance Scores
+      text: Insult Sword Fighting Skill Rating
     plotOptions:
       bar:
         colorByPoint: true
     series:
-    - name: Score
+    - name: Skill
       data:
-        x: "$label"
-        y: "$scores.data.score"
-        color: "$color"
+        x: "$pirates.data.name"
+        y: "$pirates.data.skill"
+        color: "$pirates.data.color"

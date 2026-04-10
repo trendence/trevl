@@ -1,23 +1,23 @@
 # Multiple series from the same data source. Use for comparison charts.
 # Each series maps different fields from the same rows.
 components:
-- id: multi_series_example
+- id: grog_vs_rum
   type: chart
   api: demo
   highchartsData:
     chart:
       type: column
     title:
-      text: Revenue vs Cost by Quarter
-    colors: ["#003F85", "#E85D3A"]
+      text: Grog vs Rum Sales at the SCUMM Bar
+    colors: ["#8B4513", "#DAA520"]
     legend:
       enabled: true
     series:
-    - name: Revenue
+    - name: Grog (pints)
       data:
-        x: "$financials.data.quarter"
-        y: "$financials.data.revenue"
-    - name: Cost
+        x: "$sales.data.month"
+        y: "$sales.data.grog"
+    - name: Rum (shots)
       data:
-        x: "$financials.data.quarter"
-        y: "$financials.data.cost"
+        x: "$sales.data.month"
+        y: "$sales.data.rum"

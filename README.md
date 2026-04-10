@@ -76,11 +76,13 @@ require "trevl"
 # 1. Register a data source
 Trevl::DataSource.register("demo", Trevl::DataSource::Static.new(
   data: {
-    "salary" => {
+    "pirates" => {
       "data" => [
-        {"level" => "Junior",  "value" => 42000},
-        {"level" => "Senior",  "value" => 78000},
-        {"level" => "Lead",    "value" => 92000}
+        {"name" => "Guybrush",  "barrels" => 12},
+        {"name" => "LeChuck",   "barrels" => 47},
+        {"name" => "Elaine",    "barrels" => 3},
+        {"name" => "Stan",      "barrels" => 28},
+        {"name" => "Murray",    "barrels" => 0}
       ]
     }
   }
@@ -89,23 +91,47 @@ Trevl::DataSource.register("demo", Trevl::DataSource::Static.new(
 # 2. Render
 results = Trevl.render(<<~YAML)
   components:
-  - id: salary_chart
+  - id: rum_consumption
     type: chart
     api: demo
     highchartsData:
       chart:
         type: bar
       title:
-        text: Salary by Level
+        text: Annual Rum Consumption by Pirate (Barrels)
+      colors: ["#8B4513"]
       series:
-      - name: Salary (EUR)
+      - name: Rum (barrels)
         data:
-          x: "$salary.data.level"
-          y: "$salary.data.value"
+          x: "$pirates.data.name"
+          y: "$pirates.data.barrels"
 YAML
 
 # 3. Done -- results.first["highchartsData"] is ready for Highcharts
 ```
+
+<p align="center">
+  <img src="docs/screenshots/01_bar_chart.png" alt="Bar Chart" width="600" />
+</p>
+
+## Examples Gallery
+
+<table>
+<tr>
+<td><img src="docs/screenshots/02_column_chart.png" alt="Column Chart" width="400" /></td>
+<td><img src="docs/screenshots/03_line_chart.png" alt="Line Chart" width="400" /></td>
+</tr>
+<tr>
+<td><img src="docs/screenshots/04_pie_chart.png" alt="Pie Chart" width="400" /></td>
+<td><img src="docs/screenshots/05_computed_fields.png" alt="Computed Fields" width="400" /></td>
+</tr>
+<tr>
+<td><img src="docs/screenshots/06_postprocess_top_n.png" alt="Postprocess Top-N" width="400" /></td>
+<td><img src="docs/screenshots/10_multi_series.png" alt="Multi Series" width="400" /></td>
+</tr>
+</table>
+
+See [`examples/`](examples/) for the YAML source of each chart.
 
 ## HTML Export
 

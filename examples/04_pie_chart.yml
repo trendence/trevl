@@ -1,15 +1,15 @@
 # Pie chart for proportions. Use when showing parts of a whole.
 components:
-- id: pie_example
+- id: mutiny_vote
   type: chart
   api: demo
   highchartsData:
     chart:
       type: pie
     title:
-      text: Market Share
+      text: Mutiny Board Election Results
     series:
-    - name: Share
+    - name: Votes
       data:
-        name: "$market.data.company"
-        y: "$market.data.share"
+        name: "$candidates.data.candidate"
+        y: "$candidates.data.votes"

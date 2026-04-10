@@ -1,21 +1,21 @@
 # Postprocess: sort and take top N. Use when you need to filter/sort the full dataset.
 # $result is the data array. Reassign it with the transformed result.
 components:
-- id: postprocess_example
+- id: top_islands
   type: chart
   api: demo
   postprocess: |
     $result = $result
-      .sort(function(a, b) { return b.value - a.value; })
+      .sort(function(a, b) { return b.buried - a.buried; })
       .slice(0, 5);
   highchartsData:
     chart:
       type: bar
     title:
-      text: Top 5 Cities
-    colors: ["#E87722"]
+      text: Top 5 Islands by Buried Treasure
+    colors: ["#DAA520"]
     series:
-    - name: Value
+    - name: Chests buried
       data:
-        x: "$cities.data.name"
-        y: "$cities.data.value"
+        x: "$islands.data.name"
+        y: "$islands.data.buried"

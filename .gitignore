@@ -11,3 +11,7 @@
 .rspec_status
 **/.ipynb_checkpoints/
 *.gem
+node_modules/
+package-lock.json
+package.json
+.DS_Store

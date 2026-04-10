@@ -1,14 +1,14 @@
 # Data table with columns. Use when you need tabular output instead of charts.
 components:
-- id: table_example
+- id: crew_manifest
   type: table
   api: demo
   tableData:
-    headers: ["Employee", "Department", "Salary"]
+    headers: ["Pirate", "Role", "Grog Ration"]
     columns:
-    - identifier: employee
-      value: "$staff.data.name"
-    - identifier: department
-      value: "$staff.data.department"
-    - identifier: salary
-      value: "$staff.data.salary"
+    - identifier: pirate
+      value: "$crew.data.name"
+    - identifier: role
+      value: "$crew.data.role"
+    - identifier: grog
+      value: "$crew.data.grog_ration"

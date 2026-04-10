@@ -1,20 +1,21 @@
 # Line chart for time series. Use when showing trends over time.
 components:
-- id: line_example
+- id: monkey_sightings
   type: chart
   api: demo
   highchartsData:
     chart:
       type: line
     title:
-      text: Monthly Active Users
+      text: Three-Headed Monkey Sightings per Month
     xAxis:
       type: category
     yAxis:
       title:
-        text: Users
+        text: Sightings
     series:
-    - name: MAU
+    - name: Sightings
+      color: "#2E7D32"
       data:
-        x: "$metrics.data.month"
-        y: "$metrics.data.active_users"
+        x: "$monkeys.data.month"
+        y: "$monkeys.data.sightings"

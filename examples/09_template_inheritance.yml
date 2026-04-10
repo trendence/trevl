@@ -2,24 +2,24 @@
 # Component values override template values at the same path (deep merge).
 #
 # Ruby setup:
-#   Trevl.template_store.register("branded_bar", {
+#   Trevl.template_store.register("pirate_bar", {
 #     "highchartsData" => {
 #       "chart" => {"type" => "bar"},
-#       "colors" => ["#003F85", "#E87722"],
+#       "colors" => ["#8B4513", "#DAA520"],
 #       "plotOptions" => {"bar" => {"borderRadius" => 6}},
 #       "credits" => {"enabled" => false}
 #     }
 #   })
 components:
-- id: template_example
+- id: plunder_template
   type: chart
   api: demo
-  template: branded_bar
+  template: pirate_bar
   highchartsData:
     title:
-      text: Uses branded_bar template
+      text: Plunder by Ship (uses pirate_bar template)
     series:
-    - name: Data
+    - name: Plunder
       data:
-        x: "$endpoint.data.label"
-        y: "$endpoint.data.value"
+        x: "$ships.data.ship"
+        y: "$ships.data.plunder"
