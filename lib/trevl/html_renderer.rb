@@ -28,8 +28,8 @@ module Trevl
 
     # Renders TREVL YAML to a standalone HTML string.
     # Returns a complete HTML document with all charts embedded.
-    def render(yaml_string, params: {})
-      results = Trevl.render(yaml_string, params: params)
+    def render(yaml_string, params: {}, data: nil, data_sources: {})
+      results = Trevl.render(yaml_string, params: params, data: data, data_sources: data_sources)
       charts = results.select { |r| r["type"] == "chart" && r["highchartsData"] }
       scores = results.select { |r| r["type"] == "score" && r["display"] }
 

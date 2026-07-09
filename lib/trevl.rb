@@ -48,13 +48,18 @@ module Trevl
       Validator.validate(yaml_string)
     end
 
-    def render(yaml_string, params: {})
+    # data: inline rows for this render call ({endpoint => rows}), wrapped in
+    # a Static source internally; answers any api name and components without
+    # one. data_sources: per-render sources ({name => instance}). Both take
+    # precedence over the global DataSource registry.
+    def render(yaml_string, params: {}, data: nil, data_sources: {})
       components = parse(yaml_string).components || []
-      components.filter_map { |c| Renderer.new(c, params).render }
+      components.filter_map { |c| Renderer.new(c, params, data: data, data_sources: data_sources).render }
     end
 
-    def render_to_html(yaml_string, params: {}, width: 800, height: 400)
-      HtmlRenderer.new(width: width, height: height).render(yaml_string, params: params)
+    def render_to_html(yaml_string, params: {}, data: nil, data_sources: {}, width: 800, height: 400)
+      HtmlRenderer.new(width: width, height: height)
+        .render(yaml_string, params: params, data: data, data_sources: data_sources)
     end
 
     # --- AI tooling ---

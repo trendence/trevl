@@ -71,6 +71,43 @@ RSpec.describe Trevl do
 
       expect(results).to be_empty
     end
+
+    it "renders with per-call data sources instead of the registry" do
+      source = Trevl::DataSource::Static.new(
+        data: {"ep" => {"data" => [{"x" => "B", "y" => 42}], "meta" => {}}}
+      )
+
+      results = Trevl.render(<<~YAML, data_sources: {"inline" => source})
+        components:
+        - id: c1
+          type: chart
+          api: inline
+          highchartsData:
+            series:
+            - data:
+                x: "$ep.data.x"
+                y: "$ep.data.y"
+      YAML
+
+      expect(results.first["highchartsData"]["series"].first["data"].first["y"]).to eq(42)
+      expect(Trevl::DataSource.names).not_to include("inline")
+    end
+
+    it "renders with inline data and no api key at all" do
+      results = Trevl.render(<<~YAML, data: {"ep" => [{"x" => "C", "y" => 7}]})
+        components:
+        - id: c1
+          type: chart
+          highchartsData:
+            series:
+            - data:
+                x: "$ep.data.x"
+                y: "$ep.data.y"
+      YAML
+
+      expect(results.first["highchartsData"]["series"].first["data"].first["y"]).to eq(7)
+      expect(Trevl::DataSource.names).to eq(["static"])
+    end
   end
 
   describe ".reset!" do

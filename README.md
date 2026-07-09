@@ -222,6 +222,30 @@ end
 Trevl::DataSource.register("db", MySource.new)
 ```
 
+### Per-render injection
+
+Instead of registering globally, pass data directly to a render call.
+Per-render data takes precedence over the registry and never touches shared
+state — the right choice when the data differs per request (e.g. web apps
+serving concurrent users).
+
+For inline rows, pass the raw hash as `data:` — it answers any `api:` name in
+the document, and components may omit `api:` entirely:
+
+```ruby
+Trevl.render(yaml, data: {"scores" => rows_for_this_request})
+Trevl.render_to_html(yaml, data: {"scores" => rows_for_this_request})
+```
+
+For full control (multiple sources, API/Cube instances), pass `data_sources:`
+— entries win over `data:` for their name:
+
+```ruby
+source = Trevl::DataSource::Api.new(base_url: "https://api.example.com/v1")
+
+Trevl.render(yaml, data_sources: {"mydata" => source})
+```
+
 ## Validation
 
 Validate TREVL YAML before rendering — catch errors early, not at render time.

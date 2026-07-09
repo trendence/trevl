@@ -133,6 +133,15 @@ result.errors    # => ["[component_id] Missing required field: api"]
 results = Trevl.render(yaml)
 results.first["highchartsData"]  # => Highcharts JSON
 
+# Render with inline data (no global registration; answers any api name,
+# components may omit api: — use for request-specific data)
+results = Trevl.render(yaml, data: {"salary" => [{"level" => "q50", "value" => 45000}]})
+
+# Render with per-call data source instances (win over data: and registry)
+results = Trevl.render(yaml, data_sources: {"demo" => Trevl::DataSource::Static.new(
+  data: {"salary" => {"data" => [...], "meta" => {}}}
+)})
+
 # Render to standalone HTML (self-contained, offline)
 html = Trevl.render_to_html(yaml, width: 800, height: 400)
 File.write("chart.html", html)

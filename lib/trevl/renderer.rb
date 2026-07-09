@@ -6,11 +6,13 @@ require_relative "renderer/transform"
 
 module Trevl
   class Renderer
-    attr_reader :component, :query_params, :raw_data, :warnings
+    attr_reader :component, :query_params, :data_sources, :inline_source, :raw_data, :warnings
 
-    def initialize(component_hash, query_params = {})
+    def initialize(component_hash, query_params = {}, data_sources: {}, data: nil)
       @component = component_hash
       @query_params = query_params || {}
+      @data_sources = normalize_data_sources(data_sources)
+      @inline_source = data ? DataSource::Static.new(data: data) : nil
       @raw_data = {}
       @warnings = []
       @refs = RefParser.new
@@ -37,11 +39,28 @@ module Trevl
 
     def has_api?
       api_name = component["api"]
+      return true if inline_source
       !api_name.nil? && !api_name.to_s.strip.empty?
     end
 
+    # Resolution order per component: explicitly injected data_sources win,
+    # then inline data (when given, it answers any api name and components
+    # without one), then the global registry. Injected and inline sources
+    # never touch shared state (thread-safe by construction).
     def data_source
-      @data_source ||= DataSource.for(component["api"])
+      @data_source ||= data_sources[normalize_source_name(component["api"])] ||
+        inline_source ||
+        DataSource.for(component["api"])
+    end
+
+    def normalize_data_sources(sources)
+      (sources || {}).each_with_object({}) do |(name, source), normalized|
+        normalized[normalize_source_name(name)] = source.is_a?(Class) ? source.new : source
+      end
+    end
+
+    def normalize_source_name(name)
+      name.to_s.strip.downcase
     end
 
     def request_params

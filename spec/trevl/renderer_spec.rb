@@ -361,6 +361,115 @@ RSpec.describe Trevl::Renderer do
     end
   end
 
+  describe "#render — injected data sources" do
+    let(:component) do
+      {
+        "id" => "c",
+        "type" => "chart",
+        "api" => "injected",
+        "highchartsData" => {
+          "series" => [{"data" => {"x" => "$rows.data.x", "y" => "$rows.data.y"}}]
+        }
+      }
+    end
+
+    let(:injected_source) do
+      Trevl::DataSource::Static.new(data: {"rows" => {"data" => [{"x" => "A", "y" => 1}], "meta" => {}}})
+    end
+
+    it "renders from an injected source without touching the global registry" do
+      result = described_class.new(component, {}, data_sources: {"injected" => injected_source}).render
+
+      expect(result["highchartsData"]["series"].first["data"].first["y"]).to eq(1)
+      expect(Trevl::DataSource.names).not_to include("injected")
+    end
+
+    it "prefers an injected source over a registered one with the same name" do
+      Trevl::DataSource.register("injected", Trevl::DataSource::Static.new(
+        data: {"rows" => {"data" => [{"x" => "A", "y" => 99}], "meta" => {}}}
+      ))
+
+      result = described_class.new(component, {}, data_sources: {"injected" => injected_source}).render
+
+      expect(result["highchartsData"]["series"].first["data"].first["y"]).to eq(1)
+    end
+
+    it "normalizes injected source names like the registry does" do
+      result = described_class.new(component, {}, data_sources: {" Injected ": injected_source}).render
+
+      expect(result["highchartsData"]["series"].first["data"].first["y"]).to eq(1)
+    end
+
+    it "instantiates a data source passed as a class" do
+      source_class = Class.new(Trevl::DataSource::Base) do
+        def fetch(_endpoint, _params = {}, resource: nil)
+          {"data" => [{"x" => "A", "y" => 7}], "meta" => {}}
+        end
+      end
+
+      result = described_class.new(component, {}, data_sources: {"injected" => source_class}).render
+
+      expect(result["highchartsData"]["series"].first["data"].first["y"]).to eq(7)
+    end
+
+    it "falls back to the registry for names not injected" do
+      Trevl::DataSource.register("injected", injected_source)
+
+      result = described_class.new(component, {}, data_sources: {"other" => injected_source}).render
+
+      expect(result["highchartsData"]["series"].first["data"].first["y"]).to eq(1)
+    end
+
+    it "raises DataSourceError when the name is neither injected nor registered" do
+      renderer = described_class.new(component, {}, data_sources: {"other" => injected_source})
+
+      expect { renderer.render }.to raise_error(Trevl::DataSourceError)
+    end
+  end
+
+  describe "#render — inline data" do
+    let(:inline_data) { {"rows" => {"data" => [{"x" => "A", "y" => 5}], "meta" => {}}} }
+
+    let(:component) do
+      {
+        "id" => "c",
+        "type" => "chart",
+        "api" => "anything",
+        "highchartsData" => {
+          "series" => [{"data" => {"x" => "$rows.data.x", "y" => "$rows.data.y"}}]
+        }
+      }
+    end
+
+    it "answers any api name without touching the global registry" do
+      result = described_class.new(component, {}, data: inline_data).render
+
+      expect(result["highchartsData"]["series"].first["data"].first["y"]).to eq(5)
+      expect(Trevl::DataSource.names).not_to include("anything")
+    end
+
+    it "serves components without an api key" do
+      result = described_class.new(component.except("api"), {}, data: inline_data).render
+
+      expect(result["highchartsData"]["series"].first["data"].first["y"]).to eq(5)
+    end
+
+    it "accepts plain row arrays per endpoint" do
+      result = described_class.new(component, {}, data: {"rows" => [{"x" => "A", "y" => 6}]}).render
+
+      expect(result["highchartsData"]["series"].first["data"].first["y"]).to eq(6)
+    end
+
+    it "yields to an explicitly injected source with the component's api name" do
+      injected = Trevl::DataSource::Static.new(data: {"rows" => {"data" => [{"x" => "A", "y" => 1}], "meta" => {}}})
+
+      result = described_class.new(component, {},
+        data: inline_data, data_sources: {"anything" => injected}).render
+
+      expect(result["highchartsData"]["series"].first["data"].first["y"]).to eq(1)
+    end
+  end
+
   describe ".coerce_fetch_payload" do
     it "wraps Array in standard structure" do
       result = described_class.coerce_fetch_payload([{"a" => 1}])
