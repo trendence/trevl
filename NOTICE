@@ -1,0 +1,9 @@
+Third-party notice
+
+This project renders charts with Highcharts, which is NOT covered by the MIT
+licence in LICENSE and is not distributed with this project. Highcharts is
+commercial software by Highsoft AS. Using it, whether from the CDN or from a
+local copy, requires a valid licence from Highsoft for anything beyond the
+uses their terms grant for free.
+
+See https://www.highcharts.com/license

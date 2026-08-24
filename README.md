@@ -427,5 +427,5 @@ The full TREVL v3.0 specification lives at **[trevl.trendence.com](https://trevl
 MIT -- see [LICENSE](LICENSE).
 
 Highcharts is not covered by that licence and is not distributed with this project.
-Using it requires a licence from Highsoft; see
+Using it requires a licence from Highsoft; see [NOTICE](NOTICE) and
 [highcharts.com/license](https://www.highcharts.com/license).

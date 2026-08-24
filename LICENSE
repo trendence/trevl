@@ -19,15 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-Third-party notice
-
-This project renders charts with Highcharts, which is NOT covered by the MIT
-licence above and is not distributed with this project. Highcharts is
-commercial software by Highsoft AS. Using it, whether from the CDN or from a
-local copy, requires a valid licence from Highsoft for anything beyond the
-uses their terms grant for free.
-
-See https://www.highcharts.com/license
