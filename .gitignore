@@ -18,3 +18,7 @@ package.json
 
 # Highcharts is commercially licensed and never committed here
 vendor/highcharts/
+
+# Notebook outputs are stripped before committing: they used to inline the
+# whole Highcharts bundle into the saved HTML output.
+notebooks/**/*.nbconvert.ipynb
