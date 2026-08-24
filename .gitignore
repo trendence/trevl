@@ -15,3 +15,6 @@ node_modules/
 package-lock.json
 package.json
 .DS_Store
+
+# Highcharts is commercially licensed and never committed here
+vendor/highcharts/

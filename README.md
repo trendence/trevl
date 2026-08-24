@@ -135,14 +135,14 @@ See [`examples/`](examples/) for the YAML source of each chart.
 
 ## HTML Export
 
-Render TREVL to a standalone HTML file — self-contained, offline, no CDN:
+Render TREVL to an HTML file:
 
 ```ruby
 html = Trevl.render_to_html(yaml, width: 1000, height: 500)
 File.write("chart.html", html)
 ```
 
-The output is a complete HTML document with Highcharts JS embedded inline. Open it in any browser, or take a screenshot for AI agents:
+The output is a complete HTML document that pulls Highcharts from the CDN. Point `highcharts_path` at a local copy (see [Highcharts](#highcharts)) and it is embedded inline instead, which makes the file self-contained and usable offline. Open it in any browser, or take a screenshot for AI agents:
 
 ```ruby
 # Grover gem (Puppeteer wrapper)
@@ -355,11 +355,65 @@ Trevl.configure do |c|
 end
 ```
 
+## Highcharts
+
+TREVL produces Highcharts configuration; it does not ship Highcharts. Highcharts is
+commercial software by [Highsoft](https://www.highcharts.com/license) and is
+deliberately not bundled here, so using it requires your own licence.
+
+`Trevl.render` returns plain configuration hashes and never touches Highcharts at all.
+Only the HTML export and the notebook display load it, and by default they reference
+the CDN:
+
+```ruby
+Trevl.configure do |c|
+  c.highcharts_url = "https://code.highcharts.com/11.4.0/highcharts.js"  # default
+  c.highcharts_modules = ["https://code.highcharts.com/11.4.0/highcharts-more.js"]
+end
+```
+
+Set `highcharts_path` to a local file and it gets inlined instead of linked, which is
+what you want for offline use or air-gapped rendering:
+
+```ruby
+Trevl.configure do |c|
+  c.highcharts_path = "/opt/highcharts/highcharts.js"
+end
+```
+
+`highcharts_modules` accepts URLs and local paths under the same rule: a path is
+inlined, a URL is referenced.
+
+### In a Rails app
+
+If your app already renders charts, it almost certainly ships Highcharts through the
+asset pipeline. In that case, do nothing: pass the hash from `Trevl.render` to your
+existing frontend and let the bundle you already load draw it.
+
+```ruby
+components = Trevl.render(yaml, data: {"rows" => rows})
+# hand components.first["highchartsData"] to your Stimulus controller
+```
+
+Only the server-side HTML export needs its own copy. The leanest way to give it one is
+to reuse the file the asset pipeline already has:
+
+```ruby
+# config/initializers/trevl.rb
+Trevl.configure do |c|
+  local = Rails.root.join("vendor/javascript/highcharts.js")
+  c.highcharts_path = local if local.exist?
+end
+```
+
+Without that initializer the export falls back to the CDN, which is fine for anything
+that renders in a browser with network access.
+
 ## Development
 
 ```bash
 bin/setup              # install dependencies
-bundle exec rspec      # 123 specs
+bundle exec rspec      # 140 specs
 bundle exec standardrb # lint
 bin/console            # interactive console
 ```
@@ -370,4 +424,8 @@ The full TREVL v3.0 specification lives at **[trevl.trendence.com](https://trevl
 
 ## License
 
-MIT -- see [LICENSE.txt](LICENSE.txt).
+MIT -- see [LICENSE](LICENSE).
+
+Highcharts is not covered by that licence and is not distributed with this project.
+Using it requires a licence from Highsoft; see
+[highcharts.com/license](https://www.highcharts.com/license).

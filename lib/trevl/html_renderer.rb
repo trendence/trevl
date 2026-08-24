@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
 module Trevl
-  # Renders TREVL YAML to a standalone HTML page with embedded Highcharts.
-  # The output is a complete, self-contained HTML file — no external
-  # dependencies, no CDN, works offline.
+  # Renders TREVL YAML to an HTML page that draws its charts with Highcharts.
+  # Highcharts itself is loaded from the CDN by default; configure
+  # `highcharts_path` to inline a local copy and get a self-contained file
+  # that works offline.
   #
   #   html = Trevl.render_to_html(yaml_string)
   #   File.write("chart.html", html)
@@ -15,11 +16,6 @@ module Trevl
   #   - CLI: npx puppeteer screenshot chart.html
   #
   class HtmlRenderer
-    HIGHCHARTS_JS_PATH = File.join(
-      File.expand_path("../../vendor/highcharts", __dir__),
-      "highcharts.js"
-    )
-
     def initialize(width: 800, height: 400, background: "#ffffff")
       @width = width
       @height = height
@@ -60,7 +56,7 @@ module Trevl
             .trevl-score-title { font-size: 14px; color: #6b7280; margin-bottom: 8px; }
             .trevl-score-value { font-size: 48px; font-weight: 700; color: #1f2937; }
           </style>
-          <script>#{highcharts_js}</script>
+          #{HighchartsAsset.script_tags}
         </head>
         <body>
           #{scores.map { |s| score_html(s) }.join("\n")}
@@ -90,13 +86,6 @@ module Trevl
           <div class="trevl-score-value">#{value}#{unit}</div>
         </div>
       HTML
-    end
-
-    def highcharts_js
-      unless File.exist?(HIGHCHARTS_JS_PATH)
-        raise Trevl::Error, "Highcharts JS not found at #{HIGHCHARTS_JS_PATH}"
-      end
-      File.read(HIGHCHARTS_JS_PATH)
     end
   end
 end

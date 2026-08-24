@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "trevl"
+require "tempfile"
 require "webmock/rspec"
 
 RSpec.configure do |config|

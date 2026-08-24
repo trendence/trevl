@@ -3,8 +3,6 @@
 module Trevl
   class Notebook
     class Display
-      VENDOR_DIR = File.expand_path("../../../vendor/highcharts", __dir__)
-
       def render_chart(highcharts_data, height: 400)
         container_id = "trevl_#{SecureRandom.hex(6)}"
 
@@ -40,12 +38,7 @@ module Trevl
       private
 
       def highcharts_script_tag
-        js_path = File.join(VENDOR_DIR, "highcharts.js")
-        unless File.exist?(js_path)
-          raise Trevl::Error, "Highcharts JS not found at #{js_path}. Run: curl -o #{js_path} https://unpkg.com/highcharts@11.4.0/highcharts.js"
-        end
-
-        "<script>#{File.read(js_path)}</script>\n"
+        "#{HighchartsAsset.script_tags}\n"
       end
 
       def display_html(html)

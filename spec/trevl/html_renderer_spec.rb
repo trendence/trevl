@@ -58,12 +58,23 @@ RSpec.describe Trevl::HtmlRenderer do
       expect(html).to include("Highcharts.chart")
     end
 
-    it "embeds Highcharts JS inline" do
+    it "loads Highcharts from the CDN by default" do
       html = described_class.new.render(chart_yaml)
 
-      expect(html).to include("<script>")
-      expect(html).to include("Highcharts")
-      expect(html).not_to include("code.highcharts.com")
+      expect(html).to include(%(<script src="https://code.highcharts.com/11.4.0/highcharts.js">))
+    end
+
+    it "inlines Highcharts when a local path is configured" do
+      Tempfile.create(["highcharts", ".js"]) do |file|
+        file.write("// local highcharts build")
+        file.flush
+        Trevl.configure { |c| c.highcharts_path = file.path }
+
+        html = described_class.new.render(chart_yaml)
+
+        expect(html).to include("<script>// local highcharts build</script>")
+        expect(html).not_to include("code.highcharts.com/11.4.0/highcharts.js")
+      end
     end
 
     it "includes chart data from the rendered component" do
