@@ -11,13 +11,13 @@ Gem::Specification.new do |spec|
   spec.summary = "TREVL visualization language engine"
   spec.description = "Parse, render, and display TREVL (Trendence Visualization Language) YAML " \
                       "configurations. Connects data sources to Highcharts through declarative YAML."
-  spec.homepage = "https://github.com/trendence/trevl"
+  spec.homepage = "https://trevl.trendence.com"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.1.0"
 
   spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["source_code_uri"] = "https://github.com/trendence/trevl"
-  spec.metadata["documentation_uri"] = "https://trevl.trendence.com"
+  spec.metadata["bug_tracker_uri"] = "https://github.com/trendence/trevl/issues"
 
   gemspec = File.basename(__FILE__)
   spec.files = IO.popen(%w[git ls-files -z], chdir: __dir__, err: IO::NULL) do |ls|
