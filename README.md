@@ -4,7 +4,7 @@
   <img src="assets/trendence-logo.svg" alt="Trendence" width="140" />
 </p>
 
-<h3 align="center">Write YAML, get Highcharts.</h3>
+<h3 align="center">Write YAML, get Highcharts. Efficient assembly of dashboards on well-grounded rails.</h3>
 
 <p align="center">
   <a href="https://trevl.trendence.com">DSL Documentation</a> &middot;
