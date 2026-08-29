@@ -63,7 +63,7 @@ Trevl.render(yaml)
 ## Installation
 
 ```ruby
-gem "trevl", github: "trendence/trevl"
+gem "trevl"
 ```
 
 **Prerequisites:** Ruby >= 3.1, Node.js (`brew install node`) for computed fields.
