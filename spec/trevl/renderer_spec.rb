@@ -300,6 +300,63 @@ RSpec.describe Trevl::Renderer do
       renderer.render
       expect(renderer.warnings.any? { |w| w.include?("instead of Array") }).to be true
     end
+
+    describe "recorded results" do
+      it "leaves both readers unset when the component has no postprocess" do
+        renderer = described_class.new({
+          "id" => "c", "type" => "chart", "api" => "static",
+          "highchartsData" => {"series" => [{"data" => {"y" => "$salary.data.value"}}]}
+        })
+        renderer.render
+
+        expect(renderer.postprocess_raw_results).to be_nil
+      end
+
+      it "records what the JavaScript returned, per ref key" do
+        renderer = described_class.new({
+          "id" => "c", "type" => "chart", "api" => "static",
+          "postprocess" => "$result = $result.filter(function(r) { return r.value > 40000; })",
+          "highchartsData" => {"series" => [{"data" => {"y" => "$salary.data.value"}}]}
+        })
+        renderer.render
+
+        expect(renderer.postprocess_raw_results.keys).to eq(["salary"])
+        expect(renderer.postprocess_raw_results["salary"].map { |r| r["value"] }).to eq([45000, 72000])
+      end
+
+      it "records a discarded non-Array result" do
+        renderer = described_class.new({
+          "id" => "c", "type" => "chart", "api" => "static",
+          "postprocess" => '$result = "not an array"',
+          "highchartsData" => {"series" => [{"data" => {"y" => "$salary.data.value"}}]}
+        })
+        renderer.render
+
+        expect(renderer.postprocess_raw_results["salary"]).to eq("not an array")
+      end
+
+      it "keeps the untouched rows when the result was discarded" do
+        renderer = described_class.new({
+          "id" => "c", "type" => "chart", "api" => "static",
+          "postprocess" => '$result = "not an array"',
+          "highchartsData" => {"series" => [{"data" => {"y" => "$salary.data.value"}}]}
+        })
+        renderer.render
+
+        expect(renderer.postprocess_rows["salary"].length).to eq(3)
+      end
+
+      it "exposes the rows as postprocess left them" do
+        renderer = described_class.new({
+          "id" => "c", "type" => "chart", "api" => "static",
+          "postprocess" => "$result = $result.filter(function(r) { return r.value > 40000; })",
+          "highchartsData" => {"series" => [{"data" => {"y" => "$salary.data.value"}}]}
+        })
+        renderer.render
+
+        expect(renderer.postprocess_rows["salary"].map { |r| r["value"] }).to eq([45000, 72000])
+      end
+    end
   end
 
   describe "warnings" do

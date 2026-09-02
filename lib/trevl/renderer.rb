@@ -6,7 +6,8 @@ require_relative "renderer/transform"
 
 module Trevl
   class Renderer
-    attr_reader :component, :query_params, :data_sources, :inline_source, :raw_data, :warnings
+    attr_reader :component, :query_params, :data_sources, :inline_source, :raw_data, :warnings,
+      :postprocess_rows, :postprocess_raw_results
 
     def initialize(component_hash, query_params = {}, data_sources: {}, data: nil)
       @component = component_hash
@@ -92,7 +93,11 @@ module Trevl
       counts_before = rows_by_ref_key.transform_values(&:length)
 
       rows_by_ref_key = @transform.apply_computed_fields(rows_by_ref_key, payload_by_ref_key, component)
-      rows_by_ref_key = @transform.apply_postprocess(rows_by_ref_key, component, @warnings)
+
+      raw_results = {}
+      rows_by_ref_key = @transform.apply_postprocess(rows_by_ref_key, component, @warnings, raw_results: raw_results)
+      @postprocess_raw_results = raw_results unless raw_results.empty?
+      @postprocess_rows = CoreExt::Hash.deep_dup(rows_by_ref_key)
 
       rows_by_ref_key.each do |key, rows|
         warn_postprocess_emptied(key, counts_before[key]) if rows.empty? && counts_before[key].to_i > 0

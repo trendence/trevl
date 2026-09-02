@@ -33,7 +33,10 @@ module Trevl
       end
 
       # Applies postprocess JavaScript to the full dataset.
-      def apply_postprocess(rows_by_ref_key, component, warnings)
+      # `raw_results`, when given, collects what the JavaScript actually
+      # returned per ref key, including a non-Array that gets discarded below.
+      # That is what tooling needs to explain a postprocess that did nothing.
+      def apply_postprocess(rows_by_ref_key, component, warnings, raw_results: nil)
         code = component["postprocess"]
         return rows_by_ref_key unless code.is_a?(String) && !code.strip.empty?
 
@@ -41,6 +44,7 @@ module Trevl
           js = "(function() { var $result = #{rows.to_json}; #{code.strip.chomp(";")}; return $result; })()"
           begin
             result = ExecJS.eval(js)
+            raw_results[rk] = result if raw_results
             if result.is_a?(Array)
               rows_by_ref_key[rk] = result
             else
